@@ -2,7 +2,7 @@
 // Made by Gilles Van Vlasselaer
 // More info about it on www.mrwaggel.be/post/golang-sending-a-file-over-tcp/
 
-package main
+package main2
 
 import (
 	"fmt"
@@ -34,6 +34,7 @@ func main() {
 		fmt.Println("Client connected")
 		go sendFileToClient(connection)
 	}
+
 }
 
 //This function is to 'fill'
@@ -65,7 +66,51 @@ func sendFileToClient(connection net.Conn) {
 		fmt.Println(err)
 		return
 	}
+	//fileSize := strconv.FormatInt(fileInfo.Size(), 10)
 	fileSize := fillString(strconv.FormatInt(fileInfo.Size(), 10), 10)
+	//fileName := fileInfo.Name()
+	fileName := fillString(fileInfo.Name(), 64)
+	//Send the file header first so the client knows the filename and how long it has to read the incomming file
+	fmt.Println("Sending filename and filesize!")
+	//Write first 10 bytes to client telling them the filesize
+	connection.Write([]byte(fileSize))
+	//Write 64 bytes to client containing the filename
+	connection.Write([]byte(fileName))
+	//Initialize a buffer for reading parts of the file in
+	sendBuffer := make([]byte, BUFFERSIZE)
+	//Start sending the file to the client
+	fmt.Println("Start sending file!")
+	for {
+		_, err = file.Read(sendBuffer)
+		if err == io.EOF {
+			//End of file reached, break out of for loop
+			break
+		}
+		connection.Write(sendBuffer)
+	}
+	fmt.Println("File has been sent, closing connection!")
+	return
+}
+
+func CopyFile(connection net.Conn) {
+	fmt.Println("A client has connected!")
+	defer connection.Close()
+	//Open the file that needs to be send to the client
+	file, err := os.Open("dummyfile.dat")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	//Get the filename and filesize
+	fileInfo, err := file.Stat()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//fileSize := strconv.FormatInt(fileInfo.Size(), 10)
+	fileSize := fillString(strconv.FormatInt(fileInfo.Size(), 10), 10)
+	//fileName := fileInfo.Name()
 	fileName := fillString(fileInfo.Name(), 64)
 	//Send the file header first so the client knows the filename and how long it has to read the incomming file
 	fmt.Println("Sending filename and filesize!")

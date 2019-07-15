@@ -1,8 +1,8 @@
-// tut_tcpclient_filereceiver project main.go
+package main // tut_tcpclient_filereceiver project main.go
 // Made by Gilles Van Vlasselaer
 // More info about it on www.mrwaggel.be/post/golang-sending-a-file-over-tcp/
 
-package main
+//package main
 
 import (
 	"fmt"
@@ -39,8 +39,10 @@ func main() {
 	//Strip the ':' once again but from the received file name now
 	fileName := strings.Trim(string(bufferFileName), ":")
 	//Create a new file to write in
-	fmt.Println("this is file name size as well")
-	fmt.Println(fileName)
+	//fmt.Println("this is file name after trim")
+	//fmt.Println(fileName)
+	//fmt.Println("this is file name after trim")
+	//fmt.Println(fileName)
 	newFile, err := os.Create(fileName)
 	if err != nil {
 		panic(err)
